@@ -13,6 +13,8 @@ public class ECIPApp {
     }
 
     public static void main (String args[]) {
-
+        Gateway server = new Gateway();
+        RecognitionService service = new RecognitionService(server);
+        service.recognizeQueueSizes();
     }
 }
