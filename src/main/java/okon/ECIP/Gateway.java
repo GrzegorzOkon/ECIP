@@ -2,14 +2,16 @@ package okon.ECIP;
 
 import okon.ECIP.exception.AppException;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Gateway {
@@ -20,11 +22,12 @@ public class Gateway {
     private final String CONTENT_TYPE = "application/x-www-form-urlencoded";
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
             "Chrome/84.0.4147.105 Safari/537.36";
+    private final List<String> COOKIES = new ArrayList<>();
 
-    public int doRequest(String url, RequestMethod method) {
+    public HttpURLConnection doRequest(String url, RequestMethod method) {
         try {
             URL objective = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) objective.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) objective.openConnection();
             connection.setRequestMethod(method.name());
             connection.setUseCaches(false);
             connection.setRequestProperty("Accept", ACCEPT);
@@ -33,20 +36,19 @@ public class Gateway {
             connection.setRequestProperty("Connection", CONNECTION);
             connection.setRequestProperty("Host", objective.getHost());
             connection.setRequestProperty("User-Agent", USER_AGENT);
-            return connection.getResponseCode();
+            addCookies(connection);
+            return connection;
         } catch (MalformedURLException e) {
-            e.printStackTrace();
             throw new AppException(e);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AppException(e);
         }
     }
 
-    public String doRequest(String url, RequestMethod method, String referer, Map<String, String> parameters) {
+    public HttpURLConnection doRequest(String url, RequestMethod method, String referer, Map<String, String> parameters) {
         try {
             URL objective = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) objective.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) objective.openConnection();
             byte[] contentData = getContentString(parameters).getBytes(StandardCharsets.UTF_8);
             connection.setRequestMethod(method.name());
             connection.setUseCaches(false);
@@ -63,12 +65,11 @@ public class Gateway {
             try(DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
                 wr.write(contentData);
             }
-            return connection.getHeaderField("Set-Cookie");
+            getCookies(connection);
+            return connection;
         } catch (MalformedURLException e) {
-            e.printStackTrace();
             throw new AppException(e);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AppException(e);
         }
     }
@@ -86,5 +87,34 @@ public class Gateway {
             result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
         }
         return result.toString();
+    }
+
+    private void getCookies(HttpURLConnection connection) {
+        if (isSetCookiePresent(connection)) {
+           String[] cookies = connection.getHeaderField("Set-Cookie").split(";");
+           for (String cookie : cookies) {
+               COOKIES.add(cookie);
+           }
+        }
+    }
+
+    private boolean isSetCookiePresent(HttpURLConnection connection) {
+        if (connection.getHeaderField("Set-Cookie") != null)
+            return true;
+        return false;
+    }
+
+    private void addCookies(HttpURLConnection connection) {
+        if (areCookiesPresent()) {
+            for (String cookie : COOKIES) {
+                connection.addRequestProperty("Cookie", cookie.split(";", 1)[0]);
+            }
+        }
+    }
+
+    private boolean areCookiesPresent() {
+        if (COOKIES.size() > 0)
+            return true;
+        return false;
     }
 }
