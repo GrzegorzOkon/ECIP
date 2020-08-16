@@ -3,6 +3,7 @@ package okon.ECIP;
 import okon.ECIP.params.AuthorizationParamsReader;
 
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 public class ECIPApp {
@@ -13,8 +14,7 @@ public class ECIPApp {
     }
 
     public static void main (String args[]) {
-        Gateway server = new Gateway();
-        RecognitionService service = new RecognitionService(server);
-        service.recognizeQueueSizes();
+        List<Report> reports = new ReportManager().getReports();
+        new ReportPrinter().print(reports);
     }
 }

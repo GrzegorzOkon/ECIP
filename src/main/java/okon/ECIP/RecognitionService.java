@@ -7,20 +7,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
+import java.util.List;
 
 import static okon.ECIP.ECIPApp.authorization;
 
 public class RecognitionService {
-    private Gateway server;
+    private HttpGateway server;
+    private ContentAnalyzer analyzer;
 
-    public RecognitionService(Gateway server) {
+    public RecognitionService(HttpGateway server, ContentAnalyzer analyzer) {
         this.server = server;
+        this.analyzer = analyzer;
     }
 
-    public void recognizeQueueSizes() {
+    public List<Report> recognizeQueueSizes() {
         HttpURLConnection connection = null;
         connection = goWebsite();
-        System.out.println(getWebsiteContent(connection));
+        return analyzer.reportQueueSizes(getWebsiteContent(connection));
     }
 
     private HttpURLConnection goWebsite() {
