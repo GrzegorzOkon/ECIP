@@ -13,8 +13,15 @@ public class ECIPApp {
         authorization = AuthorizationParamsReader.readProperties(new File("./params/authorization.properties"));
     }
 
-    public static void main (String args[]) {
+    public static void main(String args[]) {
         List<Report> reports = new ReportManager().getReports();
         new ReportPrinter().print(reports);
+    }
+
+    static String getJarFileName() {
+        String path = ECIPApp.class.getResource(ECIPApp.class.getSimpleName() + ".class").getFile();
+        path = path.substring(0, path.lastIndexOf('!'));
+        path = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf('.'));
+        return path;
     }
 }
