@@ -38,6 +38,7 @@ public class RecognitionService {
         try {
             server.checkLoggingCorrectness();
             while (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                connection.disconnect();
                 if (!isRedirectionLimitExceeded(redirections)) {
                     connection = doRequest(connection);
                     redirections++;
@@ -46,11 +47,11 @@ public class RecognitionService {
                 }
             }
         } catch (LoggingException e) {
-            throw new LoggingException(e);
+            throw e;
         } catch (IOException e) {
             throw new ConnectionException(e);
         } catch (RedirectionLimitException e) {
-            throw new RedirectionLimitException(e);
+            throw e;
         }
         return connection;
     }

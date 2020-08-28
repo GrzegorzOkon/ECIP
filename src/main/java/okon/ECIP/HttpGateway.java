@@ -67,6 +67,7 @@ public class HttpGateway {
                 wr.write(contentData);
             }
             getCookies(connection);
+            connection.disconnect();
             return connection;
         } catch (MalformedURLException e) {
             throw new ConnectionException(e);
