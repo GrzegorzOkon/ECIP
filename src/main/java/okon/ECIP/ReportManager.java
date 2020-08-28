@@ -1,11 +1,14 @@
 package okon.ECIP;
 
+import okon.ECIP.exception.ConnectionException;
+import okon.ECIP.exception.LoggingException;
+
 import java.util.List;
 
 public class ReportManager {
-    public List<Report> getReports() {
+    public List<Report> getReports() throws ConnectionException, LoggingException {
         HttpGateway server = new HttpGateway();
-        ContentAnalyzer analyzer= new ContentAnalyzer();
+        ContentAnalyzer analyzer = new ContentAnalyzer();
         RecognitionService service = new RecognitionService(server, analyzer);
         return service.recognizeQueueSizes();
     }

@@ -1,6 +1,7 @@
 package okon.ECIP;
 
-import okon.ECIP.exception.AppException;
+import okon.ECIP.exception.ConnectionException;
+import okon.ECIP.exception.LoggingException;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class HttpGateway {
             "Chrome/84.0.4147.105 Safari/537.36";
     private final List<String> COOKIES = new ArrayList<>();
 
-    public HttpURLConnection doRequest(String url, RequestMethod method) {
+    public HttpURLConnection doRequest(String url, RequestMethod method) throws ConnectionException {
         try {
             URL objective = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) objective.openConnection();
@@ -39,13 +40,13 @@ public class HttpGateway {
             addCookies(connection);
             return connection;
         } catch (MalformedURLException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
         } catch (IOException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
         }
     }
 
-    public HttpURLConnection doRequest(String url, RequestMethod method, String referer, Map<String, String> parameters) {
+    public HttpURLConnection doRequest(String url, RequestMethod method, String referer, Map<String, String> parameters) throws ConnectionException {
         try {
             URL objective = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) objective.openConnection();
@@ -68,9 +69,19 @@ public class HttpGateway {
             getCookies(connection);
             return connection;
         } catch (MalformedURLException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
         } catch (IOException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
+        }
+    }
+
+    public void checkLoggingCorrectness() throws LoggingException {
+        if (areCookiesPresent()) {
+            if (!COOKIES.toString().contains("JSESSIONID")) {
+                throw new LoggingException("Niepoprawny email lub hasło.");
+            }
+        } else {
+            throw new LoggingException("Niepoprawny email lub hasło.");
         }
     }
 

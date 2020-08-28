@@ -1,6 +1,6 @@
 package okon.ECIP;
 
-import okon.ECIP.exception.AppException;
+import okon.ECIP.exception.ConnectionException;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +11,11 @@ public class ReportPrinter {
     public void print(List<Report> reports) {
         printToConsole(reports);
         printToFile(reports);
+    }
+
+    public void printExceptionCommunication() {
+        printExceptionComunicationToConsole();
+        printExceptionComunicationToFile();
     }
 
     private void printToConsole(List<Report> reports) {
@@ -44,7 +49,19 @@ public class ReportPrinter {
                 out.write(System.getProperty("line.separator"));
             }
         } catch (IOException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
+        }
+    }
+
+    private void printExceptionComunicationToConsole() {
+        System.out.println("Connection error.");
+    }
+
+    private void printExceptionComunicationToFile() {
+        try (Writer out = new FileWriter(new java.io.File(ECIPApp.getJarFileName() + ".txt"))) {
+            out.write("Connection error.");
+        } catch (IOException e) {
+            throw new ConnectionException(e);
         }
     }
 }

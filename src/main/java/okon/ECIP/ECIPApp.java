@@ -1,5 +1,7 @@
 package okon.ECIP;
 
+import okon.ECIP.exception.ConnectionException;
+import okon.ECIP.exception.LoggingException;
 import okon.ECIP.params.AuthorizationParamsReader;
 
 import java.io.File;
@@ -14,8 +16,12 @@ public class ECIPApp {
     }
 
     public static void main(String args[]) {
-        List<Report> reports = new ReportManager().getReports();
-        new ReportPrinter().print(reports);
+        try {
+            List<Report> reports = new ReportManager().getReports();
+            new ReportPrinter().print(reports);
+        } catch (ConnectionException | LoggingException e) {
+            new ReportPrinter().printExceptionCommunication();
+        }
     }
 
     static String getJarFileName() {

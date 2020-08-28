@@ -1,6 +1,7 @@
 package okon.ECIP;
 
-import okon.ECIP.exception.AppException;
+import okon.ECIP.exception.ConnectionException;
+import okon.ECIP.exception.LoggingException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,29 +21,32 @@ public class RecognitionService {
         this.analyzer = analyzer;
     }
 
-    public List<Report> recognizeQueueSizes() {
+    public List<Report> recognizeQueueSizes() throws ConnectionException, LoggingException {
         HttpURLConnection connection = null;
         connection = goWebsite();
         return analyzer.reportQueueSizes(getWebsiteContent(connection));
     }
 
-    private HttpURLConnection goWebsite() {
+    private HttpURLConnection goWebsite() throws ConnectionException, LoggingException {
         HttpURLConnection connection = server.doRequest(authorization.getProperty("website"), RequestMethod.POST,
                 authorization.getProperty("website"), new HashMap<String, String>()
                 {{ put("email", authorization.getProperty("email"));
                     put("password", authorization.getProperty("password"));
                 }});
         try {
+            server.checkLoggingCorrectness();
             while (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 connection = doRequest(connection);
             }
+        } catch (LoggingException e) {
+            throw new LoggingException(e);
         } catch (IOException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
         }
         return connection;
     }
 
-    private String getWebsiteContent(HttpURLConnection connection) {
+    private String getWebsiteContent(HttpURLConnection connection) throws ConnectionException {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder stringBuilder = new StringBuilder();
@@ -52,7 +56,7 @@ public class RecognitionService {
             }
             return stringBuilder.toString();
         } catch (IOException e) {
-            throw new AppException(e);
+            throw new ConnectionException(e);
         }
     }
 
