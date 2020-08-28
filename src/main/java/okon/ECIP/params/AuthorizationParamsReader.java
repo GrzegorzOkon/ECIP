@@ -1,6 +1,6 @@
 package okon.ECIP.params;
 
-import okon.ECIP.exception.ConnectionException;
+import okon.ECIP.exception.ConfigurationException;
 import okon.ECIP.security.HexDecryptor;
 
 import java.io.File;
@@ -14,7 +14,7 @@ public class AuthorizationParamsReader {
             result.load(new FileInputStream(file));
             result.setProperty("password", HexDecryptor.convert(result.getProperty("password")));
         } catch (Exception e) {
-            throw new ConnectionException(e);
+            throw new ConfigurationException(e);
         }
         return result;
     }
