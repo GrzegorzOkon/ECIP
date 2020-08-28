@@ -78,10 +78,10 @@ public class HttpGateway {
     public void checkLoggingCorrectness() throws LoggingException {
         if (areCookiesPresent()) {
             if (!COOKIES.toString().contains("JSESSIONID")) {
-                throw new LoggingException("Niepoprawny email lub hasło.");
+                throw new LoggingException("Wrong email or password.");
             }
         } else {
-            throw new LoggingException("Niepoprawny email lub hasło.");
+            throw new LoggingException("Wrong email or password.");
         }
     }
 

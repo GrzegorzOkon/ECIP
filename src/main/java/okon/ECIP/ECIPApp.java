@@ -2,6 +2,7 @@ package okon.ECIP;
 
 import okon.ECIP.exception.ConnectionException;
 import okon.ECIP.exception.LoggingException;
+import okon.ECIP.exception.RedirectionLimitException;
 import okon.ECIP.params.AuthorizationParamsReader;
 
 import java.io.File;
@@ -19,8 +20,9 @@ public class ECIPApp {
         try {
             List<Report> reports = new ReportManager().getReports();
             new ReportPrinter().print(reports);
-        } catch (ConnectionException | LoggingException e) {
+        } catch (ConnectionException | LoggingException | RedirectionLimitException e) {
             new ReportPrinter().printExceptionCommunication();
+            throw e;
         }
     }
 

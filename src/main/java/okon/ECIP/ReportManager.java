@@ -2,11 +2,12 @@ package okon.ECIP;
 
 import okon.ECIP.exception.ConnectionException;
 import okon.ECIP.exception.LoggingException;
+import okon.ECIP.exception.RedirectionLimitException;
 
 import java.util.List;
 
 public class ReportManager {
-    public List<Report> getReports() throws ConnectionException, LoggingException {
+    public List<Report> getReports() throws ConnectionException, LoggingException, RedirectionLimitException {
         HttpGateway server = new HttpGateway();
         ContentAnalyzer analyzer = new ContentAnalyzer();
         RecognitionService service = new RecognitionService(server, analyzer);

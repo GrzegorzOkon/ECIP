@@ -2,6 +2,7 @@ package okon.ECIP;
 
 import okon.ECIP.exception.ConnectionException;
 import okon.ECIP.exception.LoggingException;
+import okon.ECIP.exception.RedirectionLimitException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,13 +22,14 @@ public class RecognitionService {
         this.analyzer = analyzer;
     }
 
-    public List<Report> recognizeQueueSizes() throws ConnectionException, LoggingException {
+    public List<Report> recognizeQueueSizes() throws ConnectionException, LoggingException, RedirectionLimitException {
         HttpURLConnection connection = null;
         connection = goWebsite();
         return analyzer.reportQueueSizes(getWebsiteContent(connection));
     }
 
-    private HttpURLConnection goWebsite() throws ConnectionException, LoggingException {
+    private HttpURLConnection goWebsite() throws ConnectionException, LoggingException, RedirectionLimitException {
+        int redirections = 0;
         HttpURLConnection connection = server.doRequest(authorization.getProperty("website"), RequestMethod.POST,
                 authorization.getProperty("website"), new HashMap<String, String>()
                 {{ put("email", authorization.getProperty("email"));
@@ -36,14 +38,26 @@ public class RecognitionService {
         try {
             server.checkLoggingCorrectness();
             while (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                connection = doRequest(connection);
+                if (!isRedirectionLimitExceeded(redirections)) {
+                    connection = doRequest(connection);
+                    redirections++;
+                } else {
+                    throw new RedirectionLimitException("Redirection limit is exceeded.");
+                }
             }
         } catch (LoggingException e) {
             throw new LoggingException(e);
         } catch (IOException e) {
             throw new ConnectionException(e);
+        } catch (RedirectionLimitException e) {
+            throw new RedirectionLimitException(e);
         }
         return connection;
+    }
+
+    private boolean isRedirectionLimitExceeded(int redirections) {
+        if (redirections < 21) return false;
+        return true;
     }
 
     private String getWebsiteContent(HttpURLConnection connection) throws ConnectionException {
